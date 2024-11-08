@@ -10,16 +10,16 @@ import pandas as pd
 def parse_game(game):
     """Parses game object to extract evaluations, clocks and positions."""
         
-    board = game.board()
-    moves = []
-    node = game
+    # board = game.board()
+    # moves = []
+    # node = game
     # Take in the mainline, annotated pgn might have multiple variations
-    while node.variations:
-        next_node = node.variation(0)
-        move = next_node.move
-        board.push(move)
-        moves.append(move.uci())
-        node = next_node
+    # while node.variations:
+    #     next_node = node.variation(0)
+    #     move = next_node.move
+    #     board.push(move)
+    #     moves.append(move.uci())
+    #     node = next_node
 
     # Last name, First name
     # Year.Month.Day
@@ -28,12 +28,11 @@ def parse_game(game):
         "WhiteElo": game.headers.get("WhiteElo", None),
         "BlackElo": game.headers.get("BlackElo", None),
         "Result": game.headers.get("Result", None),
-        "Moves": moves,
         "Date": game.headers.get("Date", None),
         "White": game.headers.get("White", None),
         "Black": game.headers.get("Black", None),
         "ECO": game.headers.get("ECO", None),
-        "Site": game.headers.get("Site", None)
+        "Event": game.headers.get("Event", None),
     }
 
 
@@ -81,6 +80,7 @@ def main():
     games_list = []
     out_file = "data/processed_games/OMOTB_ding" + year + month + ".csv"
     for game_info in process_pgn_stream():
+        #print(game_info)
         if game_count % 100000 == 0:
             print(game_count)
         if game_info == -1:
@@ -91,10 +91,10 @@ def main():
         black_name = game_info["Black"].lower()
         #print(white_name)
         #print(white_name, black_name)
-        if has_exact_match(white_name, "liren, ding") or has_exact_match(black_name, "liren, ding"):
-            print(white_name, black_name)
-            print(game_info)
-            games_list.append(game_info)
+        #if has_exact_match(white_name, "liren, ding") or has_exact_match(black_name, "liren, ding"):
+            #print(white_name, black_name)
+            #print(game_info)
+        games_list.append(game_info)
             # with open(filename, 'wb') as file:
             #    pickle.dump(game_info, file)
         game_count += 1
