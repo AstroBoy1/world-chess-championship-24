@@ -63,7 +63,8 @@ def process_pgn_stream():
 def has_exact_match(name, keyword):
     # Use \b to denote word boundaries for exact matches
     #pattern = rf'\b{re.escape(keyword)}\b'
-    return "ding" in name and "liren" in name
+    #return "ding" in name and "liren" in name
+    return "gukesh" in name
     #return re.search(pattern, name) is not None
 
 #test = "liren, ding"
@@ -76,9 +77,9 @@ def main():
     out_dir = "data/processed_games/"
     game_count = 0
     start = time.time()
-    names = set()
     games_list = []
     out_file = "data/processed_games/OMOTB_ding" + year + month + ".csv"
+    out_file = "data/processed_games/OMOTB_gukesh" + year + month + ".csv"
     for game_info in process_pgn_stream():
         #print(game_info)
         if game_count % 100000 == 0:
