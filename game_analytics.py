@@ -1,7 +1,9 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
-def analyze_player(name, fn):
+def analyze_player(name, fn, eco_openings):
     df = pd.read_csv(fn)
 
     # Convert only the 'Event' column to lowercase
@@ -61,23 +63,103 @@ def analyze_player(name, fn):
     print("White score out of 7:", average_white_score * 7)
     print("Black score out of 7:", average_black_score * 7)
 
-    return len(player_white_wins), len(player_black_wins), len(player_white_losses), len(player_black_losses), len(player_white_draws), len(player_black_draws)
+    # Count number of times they played certain ECO openings
+    #print("White opening counts", player_white['ECO'].value_counts())
+    #print("Black opening counts", player_black['ECO'].value_counts())
+
+    # Count number of times they played certain ECO openings and the name of the opening
+    print("White opening counts", player_white['white_move'].value_counts())
+    #print("Black opening counts", player_black['black_move'].value_counts())
+
+    # Count number of times they played black and the first move, second move pair
+    # Create a new column for the first two moves
+    player_black['move_pair'] = player_black['white_move'] + " " + player_black['black_move']
+    print("Black opening counts", player_black['move_pair'].value_counts())
+
+    # Return totals for plotting
+    return {
+        'White': [len(player_white_wins), len(player_white_draws), len(player_white_losses)],
+        'Black': [len(player_black_wins), len(player_black_draws), len(player_black_losses)]
+    }
+
+
+import matplotlib.pyplot as plt
+
+
+def plot_pie_chart(data, player_name):
+    labels = ['Wins', 'Draws', 'Losses']
+    colors = ['#377eb8', '#ff7f00', '#999999']
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    for ax, (side, results) in zip(axes, data.items()):
+        wedges, texts, autotexts = ax.pie(
+            results, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140
+        )
+        ax.set_title(f"Playing {side} Score", fontsize=14, fontweight='bold')
+
+        # Change font size for labels and percentages
+        for text in texts:
+            text.set_fontsize(14)
+        for autotext in autotexts:
+            autotext.set_fontsize(14)
+
+    # Create a single legend for both pie charts
+    fig.legend(labels, loc='upper center', ncol=3, fontsize=12, bbox_to_anchor=(0.5, 1.05))
+
+    plt.suptitle(f"{player_name} - 2024 Classical Results Against 2700s", fontsize=16, fontweight='bold')
+    plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to fit the legend
+
+    # Save the plot
+    save_path = f"{player_name}_results_pie_chart.png"
+    plt.savefig(save_path)
+    print(f"Pie charts saved as {save_path}")
+    plt.show()
+
+
+def eco_map():
+    # Load all TSV files into a single DataFrame
+    file_paths = [
+        'data/openings/eco/a.tsv', 
+        'data/openings/eco/b.tsv', 
+        'data/openings/eco/c.tsv',
+        'data/openings/eco/d.tsv', 
+        'data/openings/eco/e.tsv'
+    ]
+
+    # Read the TSV files into a list of DataFrames
+    df_list = [pd.read_csv(file, sep='\t') for file in file_paths]
+
+    # Concatenate all DataFrames into one
+    openings_df = pd.concat(df_list, ignore_index=True)
+
+    # Create a dictionary for efficient lookup
+    eco_map = dict(zip(openings_df['eco'], openings_df['name']))
+
+    return eco_map
 
 
 def main():
     # Read the CSV file
     fn = "data/processed_games/OMOTB_ding202410.csv"
+    eco_openings = eco_map()
 
     print("Ding Liren Analysis")
-    analyze_player("Ding Liren", fn)
+    ding_results = analyze_player("Ding Liren", fn, eco_openings)
 
     print("Gukesh Dommaraju Analysis")
     #analyze_player(df_2024_filtered, "Gukesh, D.")
-    analyze_player("Gukesh", "data/processed_games/OMOTB_gukesh202410.csv")
+    gukesh_results = analyze_player("Gukesh", "data/processed_games/OMOTB_gukesh202410.csv", eco_openings)
+    plot_pie_chart(ding_results, "Ding Liren")
+    plot_pie_chart(gukesh_results, "Gukesh Dommaraju")
 
     # 7.5 games needed to win the match
     print("Number of expected games", round(7.5 / (7.7/(7.7+4.8))))
     print("Gukesh score", 12 * (7.7/(7.7+4.8)))
+
+    # More draws likely in world chess championship
+    # Ding has a plus score against Gukesh
+
     # Ding Liren wins as white: 0
     # Ding Liren losses as white: 4
     # Ding Liren draws as white: 17

@@ -8,7 +8,7 @@ for month in $(seq 10 10); do
     formatted_month=$(printf "%02d" $month)
 
     #file_path="data/OMOTB${year}${formatted_month}PGN.pgn"
-    #file_path="data/dingliren.pgn"
+    file_path="data/dingliren.pgn"
     file_path="data/gukesh.pgn"
     echo "Processing file: $file_path"
     cat $file_path | python read_data.py $year $month

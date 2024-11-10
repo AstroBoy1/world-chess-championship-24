@@ -24,6 +24,20 @@ def parse_game(game):
     # Last name, First name
     # Year.Month.Day
 
+    # Get the first move for white and black
+    board = game.board()
+    moves = ["None", "None"]
+    node = game
+    count = 0
+    while node.variations:
+        next_node = node.variation(0)
+        move = next_node.move
+        board.push(move)
+        moves[count] = move.uci()
+        node = next_node
+        count += 1
+        if count > 1:
+            break
     return {
         "WhiteElo": game.headers.get("WhiteElo", None),
         "BlackElo": game.headers.get("BlackElo", None),
@@ -33,6 +47,8 @@ def parse_game(game):
         "Black": game.headers.get("Black", None),
         "ECO": game.headers.get("ECO", None),
         "Event": game.headers.get("Event", None),
+        "white_move": moves[0],
+        "black_move": moves[1],
     }
 
 
